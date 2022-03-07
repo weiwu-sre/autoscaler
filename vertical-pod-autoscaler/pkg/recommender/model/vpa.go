@@ -100,6 +100,8 @@ type Vpa struct {
 	ContainersInitialAggregateState ContainerNameToAggregateStateMap
 	// UpdateMode describes how recommendations will be applied to pods
 	UpdateMode *vpa_types.UpdateMode
+	// OomBumpUpRatio specifies how much memory will be added after observing OOM.
+	OomBumpUpRatio *float32
 	// Created denotes timestamp of the original VPA object creation
 	Created time.Time
 	// CheckpointWritten indicates when last checkpoint for the VPA object was stored.
@@ -140,6 +142,7 @@ func (vpa *Vpa) UseAggregationIfMatching(aggregationKey AggregateStateKey, aggre
 		vpa.aggregateContainerStates[aggregationKey] = aggregation
 		aggregation.IsUnderVPA = true
 		aggregation.UpdateMode = vpa.UpdateMode
+		aggregation.OomBumpUpRatio = vpa.OomBumpUpRatio
 		aggregation.UpdateFromPolicy(vpa_api_util.GetContainerResourcePolicy(aggregationKey.ContainerName(), vpa.ResourcePolicy))
 	}
 }
@@ -231,6 +234,21 @@ func (vpa *Vpa) SetUpdateMode(updatePolicy *vpa_types.PodUpdatePolicy) {
 	}
 	for _, state := range vpa.aggregateContainerStates {
 		state.UpdateMode = vpa.UpdateMode
+	}
+}
+
+// SetOomBumpUpRatio updates the OomBumpUpRatio of the VPA and aggregators under this VPA.
+func (vpa *Vpa) SetOomBumpUpRatio(updatePolicy *vpa_types.PodUpdatePolicy) {
+	if updatePolicy == nil {
+		vpa.OomBumpUpRatio = nil
+	} else {
+		if updatePolicy.OomBumpUpRatio == vpa.OomBumpUpRatio {
+			return
+		}
+		vpa.OomBumpUpRatio = updatePolicy.OomBumpUpRatio
+	}
+	for _, state := range vpa.aggregateContainerStates {
+		state.OomBumpUpRatio = vpa.OomBumpUpRatio
 	}
 }
 

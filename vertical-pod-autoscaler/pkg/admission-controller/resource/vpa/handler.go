@@ -119,6 +119,10 @@ func validateVPA(vpa *vpa_types.VerticalPodAutoscaler, isCreate bool) error {
 		if minReplicas := vpa.Spec.UpdatePolicy.MinReplicas; minReplicas != nil && *minReplicas <= 0 {
 			return fmt.Errorf("MinReplicas has to be positive, got %v", *minReplicas)
 		}
+
+		if oomBumpUpRatio := vpa.Spec.UpdatePolicy.OomBumpUpRatio; oomBumpUpRatio != nil && *oomBumpUpRatio <= 1 {
+			return fmt.Errorf("OomBumpUpRatio has to be greater than 1, got %v", *oomBumpUpRatio)
+		}
 	}
 
 	if vpa.Spec.ResourcePolicy != nil {

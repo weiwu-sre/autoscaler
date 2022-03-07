@@ -233,7 +233,8 @@ func (cluster *ClusterState) RecordOOM(containerID ContainerID, timestamp time.T
 	if !containerExists {
 		return NewKeyError(containerID.ContainerName)
 	}
-	err := containerState.RecordOOM(timestamp, requestedMemory)
+	vpa := cluster.GetControllingVPA(pod)
+	err := containerState.RecordOOM(timestamp, requestedMemory, vpa)
 	if err != nil {
 		return fmt.Errorf("error while recording OOM for %v, Reason: %v", containerID, err)
 	}
@@ -278,6 +279,7 @@ func (cluster *ClusterState) AddOrUpdateVpa(apiObject *vpa_types.VerticalPodAuto
 	vpa.Conditions = conditionsMap
 	vpa.Recommendation = currentRecommendation
 	vpa.SetUpdateMode(apiObject.Spec.UpdatePolicy)
+	vpa.SetOomBumpUpRatio(apiObject.Spec.UpdatePolicy)
 	vpa.SetResourcePolicy(apiObject.Spec.ResourcePolicy)
 	return nil
 }

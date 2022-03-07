@@ -117,6 +117,12 @@ type PodUpdatePolicy struct {
 	// checks like PDB).
 	// +optional
 	MinReplicas *int32 `json:"minReplicas,omitempty" protobuf:"varint,2,opt,name=minReplicas"`
+
+	// How much memory will be added after observing OOM.
+	// Global default is 1.2, which means 20% memory will be added to recommended value.
+	// Overrides global '--oom-bump-up-ratio' flag.
+	// +optional
+	OomBumpUpRatio *float32 `json:"oomBumpUpRatio,omitempty" protobuf:"varint,3,opt,name=oomBumpUpRatio"`
 }
 
 // UpdateMode controls when autoscaler applies changes to the pod resoures.

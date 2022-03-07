@@ -35,6 +35,7 @@ func TestValidateVPA(t *testing.T) {
 	badUpdateMode := vpa_types.UpdateMode("bad")
 	validUpdateMode := vpa_types.UpdateModeOff
 	badMinReplicas := int32(0)
+	badMomBumpUpRatio := float32(0.9)
 	validMinReplicas := int32(1)
 	badScalingMode := vpa_types.ContainerScalingMode("bad")
 	validScalingMode := vpa_types.ContainerScalingModeAuto
@@ -87,6 +88,18 @@ func TestValidateVPA(t *testing.T) {
 				},
 			},
 			expectError: fmt.Errorf("MinReplicas has to be positive, got 0"),
+		},
+		{
+			name: "less than 1 oomBumpUpRatio",
+			vpa: vpa_types.VerticalPodAutoscaler{
+				Spec: vpa_types.VerticalPodAutoscalerSpec{
+					UpdatePolicy: &vpa_types.PodUpdatePolicy{
+						OomBumpUpRatio: &badMomBumpUpRatio,
+						UpdateMode:     &validUpdateMode,
+					},
+				},
+			},
+			expectError: fmt.Errorf("OomBumpUpRatio has to be greater than 1, got 0.9"),
 		},
 		{
 			name: "no policy name",

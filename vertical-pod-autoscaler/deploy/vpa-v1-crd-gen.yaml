@@ -399,6 +399,10 @@ spec:
                     - Recreate
                     - Auto
                     type: string
+                  oomBumpUpRatio:
+                    description: OOMBumpUpRatio specifies how much memory will be added after observing OOM.
+                    format: float
+                    type: number
                 type: object
             required:
             - targetRef

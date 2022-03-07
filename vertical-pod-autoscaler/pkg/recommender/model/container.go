@@ -190,16 +190,22 @@ func (container *ContainerState) addMemorySample(sample *ContainerUsageSample, i
 }
 
 // RecordOOM adds info regarding OOM event in the model as an artificial memory sample.
-func (container *ContainerState) RecordOOM(timestamp time.Time, requestedMemory ResourceAmount) error {
+func (container *ContainerState) RecordOOM(timestamp time.Time, requestedMemory ResourceAmount, vpa *VPA) error {
 	// Discard old OOM
 	if timestamp.Before(container.WindowEnd.Add(-1 * GetAggregationsConfig().MemoryAggregationInterval)) {
 		return fmt.Errorf("OOM event will be discarded - it is too old (%v)", timestamp)
 	}
 	// Get max of the request and the recent usage-based memory peak.
 	// Omitting oomPeak here to protect against recommendation running too high on subsequent OOMs.
+	var oomBumpUpRatio float64
+	if vpa != nil && vpa.OomBumpUpRatio != nil {
+		oomBumpUpRatio = *vpa.OomBumpUpRatio
+	} else {
+		oomBumpUpRatio = float64(OOMBumpUpRatio)
+	}
 	memoryUsed := ResourceAmountMax(requestedMemory, container.memoryPeak)
 	memoryNeeded := ResourceAmountMax(memoryUsed+MemoryAmountFromBytes(OOMMinBumpUp),
-		ScaleResource(memoryUsed, OOMBumpUpRatio))
+		ScaleResource(memoryUsed, oomBumpUpRatio))
 
 	oomMemorySample := ContainerUsageSample{
 		MeasureStart: timestamp,

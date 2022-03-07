@@ -41,6 +41,8 @@ spec:
               properties:
                 minReplicas:
                   type: integer
+                oomBumpUpRatio:
+                  type: number
                 updateMode:
                   type: string
             resourcePolicy:

@@ -108,6 +108,7 @@ type AggregateContainerState struct {
 	LastRecommendation  corev1.ResourceList
 	IsUnderVPA          bool
 	UpdateMode          *vpa_types.UpdateMode
+	OomBumpUpRatio      *float32
 	ScalingMode         *vpa_types.ContainerScalingMode
 	ControlledResources *[]ResourceName
 }
